@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz de Francês</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Rockwell&family=Franklin+Gothic+Demi&family=Franklin+Gothic+Heavy&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Rockwell&family=Century+Gothic&family=Franklin+Gothic+Demi&family=Franklin+Gothic+Heavy&display=swap" rel="stylesheet">
     <style>
         @font-face {
             font-family: 'Cooper Black';
@@ -135,8 +135,9 @@
             white-space: pre-wrap;
         }
         .french-phrase {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Century Gothic', 'Poppins', sans-serif;
             font-size: 1rem;
+            font-weight: bold;
             color: white;
             margin-top: 10px;
             text-align: center;
@@ -218,31 +219,6 @@
         }
         #answer-input:focus {
             border-color: #10C894;
-        }
-        .keyboard {
-            display: none;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-            margin-top: 10px;
-            width: 80%;
-            max-width: 500px;
-        }
-        .keyboard button {
-            background-color: #C6B9DD;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .keyboard button:hover {
-            background-color: #A7007B;
-            color: white;
-        }
-        .keyboard .clear-btn {
-            background-color: #C8102E;
-            grid-column: span 2;
         }
         .verify-btn {
             background-color: #3B8C59;
@@ -420,22 +396,6 @@
             #answer-input {
                 width: 90%;
             }
-            .keyboard {
-                grid-template-columns: repeat(6, 1fr);
-            }
-            .keyboard button {
-                padding: 8px;
-                font-size: 0.9rem;
-            }
-        }
-        @media (max-width: 480px) {
-            .keyboard {
-                grid-template-columns: repeat(5, 1fr);
-            }
-            .keyboard button {
-                padding: 6px;
-                font-size: 0.8rem;
-            }
         }
     </style>
 </head>
@@ -463,7 +423,7 @@
         </div>
         <div class="quiz-container">
             <div class="question-header">
-                Escreva corretamente a frase que foi falada
+                Traduza a palavra
                 <div class="french-phrase" id="french-phrase"></div>
             </div>
             <img id="mascot-small" src="MASCOTENINHO.png" alt="Mascote Pequeno" onerror="console.error('Erro ao carregar MASCOTENINHO.png');">
@@ -483,7 +443,6 @@
             </div>
             <div class="input-container">
                 <input type="text" id="answer-input" placeholder="Digite a frase em português..." class="slide-in">
-                <div class="keyboard" id="keyboard"></div>
             </div>
             <button class="verify-btn" id="verify-btn">VERIFICAR</button>
             <div class="feedback-container">
@@ -793,7 +752,6 @@
         const startButton = document.getElementById('start-button');
         const quizPage = document.getElementById('quiz-page');
         const answerInput = document.getElementById('answer-input');
-        const keyboard = document.getElementById('keyboard');
         const verifyBtn = document.getElementById('verify-btn');
         const feedback = document.getElementById('feedback');
         const correctAnswer = document.getElementById('correct-answer');
@@ -815,34 +773,6 @@
         const positiveAudio = document.getElementById('positive-audio');
         const negativeAudio = document.getElementById('negative-audio');
         const restartButton = document.getElementById('restart-button');
-        // Teclado virtual com caracteres franceses
-        const frenchKeys = [
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-            'u', 'v', 'w', 'x', 'y', 'z', 'à', 'á', 'â', 'ã', 'ä',
-            'ç', 'é', 'è', 'ê', 'ë', 'í', 'î', 'ï', 'ó', 'ô', 'õ',
-            'ú', 'ù', 'û', ' ', '.', ',', '\'', '-', '!', '?', 'Clear'
-        ];
-        // Criação do teclado virtual
-        function createKeyboard() {
-            frenchKeys.forEach(key => {
-                const button = document.createElement('button');
-                button.textContent = key;
-                if (key === 'Clear') {
-                    button.classList.add('clear-btn');
-                    button.addEventListener('click', () => {
-                        answerInput.value = '';
-                        answerInput.focus();
-                    });
-                } else {
-                    button.addEventListener('click', () => {
-                        answerInput.value += key;
-                        answerInput.focus();
-                    });
-                }
-                keyboard.appendChild(button);
-            });
-        }
         // Função para pular a introdução
         function skipIntro() {
             introPage.classList.add('fade-out');
@@ -887,19 +817,6 @@
             repeatBtn.addEventListener('click', playAudio);
             speedSelect.addEventListener('change', changeSpeed);
             restartButton.addEventListener('click', restartQuiz);
-            answerInput.addEventListener('focus', () => {
-                keyboard.style.display = 'grid';
-                keyboard.classList.add('fade-in');
-            });
-            answerInput.addEventListener('blur', () => {
-                // Apenas esconde o teclado se o clique não for em um botão do teclado
-                setTimeout(() => {
-                    if (!keyboard.contains(document.activeElement)) {
-                        keyboard.style.display = 'none';
-                    }
-                }, 100);
-            });
-            createKeyboard();
             // Embaralha as questões
             shuffleArray(quizData);
             // Timeout para pular introdução em caso de falha
@@ -1073,22 +990,22 @@
             const percentage = Math.round((score / totalQuestions) * 100);
             if (percentage >= 95) {
                 resultsTitle.textContent = "EXCELENTE";
-                resultsMessage.innerHTML = `Parabéns pelo seu desempenho excepcional! Você alcançou um resultado EXCELENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso demonstra um domínio impressionante das expressões e da ortografia francesa. Continue assim, pois seu esforço e dedicação são inspiradores! Este resultado reflete não apenas sua habilidade linguística, mas também sua atenção aos detalhes e compromisso em aprender. Que tal continuar explorando o idioma com o mesmo entusiasmo? A prática constante vai te levar ainda mais longe.`;
+                resultsMessage.innerHTML = `Parabéns pelo seu desempenho excepcional! Você alcançou um resultado EXCELENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso demonstra um domínio impressionante das expressões e da ortografia francesa. Continue assim, pois seu esforço e dedicação são inspiradores! Este resultado reflete não apenas sua habilidade linguística, mas também sua atenção aos detalhes e compromisso em aprender. Que tal continuar explorando o idioma com o mesmo entusiasmo? A prática constante vai te levar ainda mais longe.`;
                 resultsMascot.src = "MASCOTEFELIZ.png";
                 positiveAudio.play().catch(err => console.error('Erro ao reproduzir POSITIVO.mp3:', err));
             } else if (percentage >= 75) {
                 resultsTitle.textContent = "PARABÉNS";
-                resultsMessage.innerHTML = `Parabéns pelo seu desempenho! Você obteve um BOM resultado, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso mostra que você está no caminho certo, com uma sólida compreensão do idioma. Sua dedicação está valendo a pena, e cada frase certa é um passo rumo à fluência. Continue assim, brilhando no aprendizado do francês!`;
+                resultsMessage.innerHTML = `Parabéns pelo seu desempenho! Você obteve um BOM resultado, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso mostra que você está no caminho certo, com uma sólida compreensão do idioma. Sua dedicação está valendo a pena, e cada palavra certa é um passo rumo à fluência. Continue assim, brilhando no aprendizado do francês!`;
                 resultsMascot.src = "MASCOTEALEGRE.png";
                 positiveAudio.play().catch(err => console.error('Erro ao reproduzir POSITIVO.mp3:', err));
             } else if (percentage >= 60) {
                 resultsTitle.textContent = "QUASE LÁ";
-                resultsMessage.innerHTML = `Você alcançou o nível SUFICIENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso indica um progresso notável, com uma boa base no idioma. Sua dedicação está clara, e você está muito próximo de resultados ainda melhores. Cada frase escrita é um avanço no aprendizado do francês. Continue se empenhando, e logo verá seu desempenho crescer! Siga firme na jornada para dominar o idioma!`;
+                resultsMessage.innerHTML = `Você alcançou o nível SUFICIENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso indica um progresso notável, com uma boa base no idioma. Sua dedicação está clara, e você está muito próximo de resultados ainda melhores. Cada palavra escrita é um avanço no aprendizado do francês. Continue se empenhando, e logo verá seu desempenho crescer! Siga firme na jornada para dominar o idioma!`;
                 resultsMascot.src = "MASCOTEDUVIDA.png";
                 negativeAudio.play().catch(err => console.error('Erro ao reproduzir NEGATIVO.mp3:', err));
             } else {
                 resultsTitle.textContent = "NÃO FOI DESSA VEZ";
-                resultsMessage.innerHTML = `Você obteve o nível INSUFICIENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês. Não desanime! Cada tentativa é uma oportunidade de aprendizado, e você já deu o primeiro passo ao participar. O francês pode ser desafiador, mas com prática, você vai melhorar. Reforce as frases e continue se dedicando. Sua persistência vai te levar mais longe na jornada do idioma!`;
+                resultsMessage.innerHTML = `Você obteve o nível INSUFICIENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês. Não desanime! Cada tentativa é uma oportunidade de aprendizado, e você já deu o primeiro passo ao participar. O francês pode ser desafiador, mas com prática, você vai melhorar. Reforce as palavras e continue se dedicando. Sua persistência vai te levar mais longe na jornada do idioma!`;
                 resultsMascot.src = "MASCOTEDUVIDA.png";
                 negativeAudio.play().catch(err => console.error('Erro ao reproduzir NEGATIVO.mp3:', err));
             }
