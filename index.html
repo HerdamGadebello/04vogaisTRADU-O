@@ -228,7 +228,8 @@
             font-size: 1rem;
             border-radius: 50px;
             cursor: pointer;
-            margin: 20px 0;
+            margin: 20px auto;
+            display: block;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -285,6 +286,7 @@
             margin: 10px 0;
             color: black;
             text-align: left;
+            display: none;
         }
         .possible-translations ul {
             list-style-type: disc;
@@ -415,6 +417,10 @@
             }
             .french-phrase {
                 font-size: 1rem;
+            }
+            .verify-btn {
+                width: 50%;
+                padding: 10px;
             }
         }
     </style>
@@ -760,7 +766,6 @@
         let currentQuestion = 0;
         let score = 0;
         let answeredQuestions = new Array(quizData.length).fill(false);
-        let wrongAnswers = [];
         let userAnswers = [];
         let isAnswerSelected = false;
         let currentAudio = null;
@@ -813,7 +818,6 @@
                     currentQuestion = savedProgress.currentQuestion || 0;
                     score = savedProgress.score || 0;
                     answeredQuestions = savedProgress.answeredQuestions || new Array(quizData.length).fill(false);
-                    wrongAnswers = savedProgress.wrongAnswers || [];
                     userAnswers = savedProgress.userAnswers || [];
                 }
             } catch (e) {
@@ -854,7 +858,6 @@
             currentQuestion = 0;
             score = 0;
             answeredQuestions = new Array(quizData.length).fill(false);
-            wrongAnswers = [];
             userAnswers = [];
             localStorage.removeItem('quizProgress');
             homePage.style.display = 'none';
@@ -868,7 +871,6 @@
             currentQuestion = 0;
             score = 0;
             answeredQuestions = new Array(quizData.length).fill(false);
-            wrongAnswers = [];
             userAnswers = [];
             localStorage.removeItem('quizProgress');
             resultsPage.style.display = 'none';
@@ -880,16 +882,9 @@
         }
         // Carrega a questão atual
         function loadQuestion() {
-            if (answeredQuestions.every(answered => answered) && wrongAnswers.length === 0) {
+            if (currentQuestion >= quizData.length) {
                 showResults();
                 return;
-            }
-            if (currentQuestion >= quizData.length) {
-                // Adiciona questões erradas para repetição
-                quizData.push(...wrongAnswers.map(index => quizData[index]));
-                wrongAnswers = [];
-                currentQuestion = 0;
-                answeredQuestions = new Array(quizData.length).fill(false);
             }
             const question = quizData[currentQuestion];
             answerInput.value = '';
@@ -898,12 +893,13 @@
             correctAnswer.textContent = '';
             translation.innerHTML = '';
             feedback.textContent = '';
+            possibleTranslations.style.display = 'none';
             possibleTranslations.innerHTML = '';
             feedback.className = 'feedback';
             frenchPhrase.textContent = question.french;
             isAnswerSelected = false;
             prevBtn.disabled = currentQuestion === 0;
-            nextBtn.textContent = answeredQuestions.every(answered => answered) && wrongAnswers.length === 0 ? "VER RESULTADO" : "AVANÇAR";
+            nextBtn.textContent = currentQuestion === quizData.length - 1 ? "VER RESULTADO" : "AVANÇAR";
             if (answeredQuestions[currentQuestion]) {
                 showCorrectAnswer();
             }
@@ -915,32 +911,34 @@
             if (isAnswerSelected) return;
             buttonAudio.play().catch(err => console.error('Erro ao reproduzir BUTTON.mp3:', err));
             const question = quizData[currentQuestion];
-            const userAnswer = answerInput.value.trim().toLowerCase();
+            const userAnswer = answerInput.value.trim();
+            // Normaliza a resposta do usuário para comparação (remove diferenças de maiúsculas/minúsculas)
+            const normalizedUserAnswer = userAnswer.toLowerCase();
             // Verifica se a resposta está entre as possíveis traduções
-            const isCorrect = question.possibleTranslations.some(translation => translation.toLowerCase() === userAnswer);
+            const isCorrect = question.possibleTranslations.some(translation => translation.toLowerCase() === normalizedUserAnswer);
+            // Encontra a resposta do usuário nas traduções possíveis (mantendo a capitalização original)
+            const userCorrectAnswer = question.possibleTranslations.find(translation => translation.toLowerCase() === normalizedUserAnswer) || question.correctAnswer;
             userAnswers[currentQuestion] = { selected: userAnswer, isCorrect };
             if (isCorrect) {
                 score++;
                 feedback.textContent = 'CORRETO';
                 feedback.className = 'feedback correct';
                 winAudio.play().catch(err => console.error('Erro ao reproduzir WIN.wav:', err));
-                const wrongIndex = wrongAnswers.indexOf(currentQuestion);
-                if (wrongIndex !== -1) wrongAnswers.splice(wrongIndex, 1);
             } else {
                 feedback.textContent = 'INCORRETO';
                 feedback.className = 'feedback incorrect';
                 errorAudio.play().catch(err => console.error('Erro ao reproduzir ERROR.wav:', err));
-                if (!wrongAnswers.includes(currentQuestion)) wrongAnswers.push(currentQuestion);
             }
-            // Exibe a primeira tradução como referência
-            correctAnswer.textContent = question.correctAnswer;
-            translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
+            // Exibe a resposta correta (resposta do usuário se correta, caso contrário a padrão)
+            correctAnswer.textContent = isCorrect ? userAnswer : question.correctAnswer;
+            translation.innerHTML = `<span class="core">${isCorrect ? userAnswer : question.correctAnswer}</span>`;
             // Exibe todas as possíveis traduções
             possibleTranslations.innerHTML = `
                 <ul>
                     ${question.possibleTranslations.map(translation => `<li>${translation}</li>`).join('')}
                 </ul>
             `;
+            possibleTranslations.style.display = 'block';
             answeredQuestions[currentQuestion] = true;
             isAnswerSelected = true;
             answerInput.disabled = true;
@@ -950,13 +948,16 @@
         function showCorrectAnswer() {
             const question = quizData[currentQuestion];
             const userAnswer = userAnswers[currentQuestion];
-            correctAnswer.textContent = question.correctAnswer;
-            translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
+            // Usa a resposta do usuário se correta, caso contrário a padrão
+            const displayAnswer = userAnswer && question.possibleTranslations.some(t => t.toLowerCase() === userAnswer.selected.toLowerCase()) ? userAnswer.selected : question.correctAnswer;
+            correctAnswer.textContent = displayAnswer;
+            translation.innerHTML = `<span class="core">${displayAnswer}</span>`;
             possibleTranslations.innerHTML = `
                 <ul>
                     ${question.possibleTranslations.map(translation => `<li>${translation}</li>`).join('')}
                 </ul>
             `;
+            possibleTranslations.style.display = 'block';
             frenchPhrase.textContent = question.french;
             if (userAnswer && !userAnswer.isCorrect) {
                 feedback.textContent = 'INCORRETO';
@@ -1011,9 +1012,8 @@
         }
         // Atualiza a barra de progresso
         function updateProgressBar() {
-            const totalQuestions = quizData.length + wrongAnswers.length;
             const answeredCount = answeredQuestions.filter(answered => answered).length;
-            progressBar.style.width = `${(answeredCount / totalQuestions) * 100}%`;
+            progressBar.style.width = `${(answeredCount / quizData.length) * 100}%`;
         }
         // Exibe a página de resultados
         function showResults() {
@@ -1052,7 +1052,6 @@
                     currentQuestion,
                     score,
                     answeredQuestions,
-                    wrongAnswers,
                     userAnswers
                 }));
             } catch (e) {
