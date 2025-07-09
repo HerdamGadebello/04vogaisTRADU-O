@@ -41,6 +41,7 @@
             background-size: cover;
             background-position: center;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -54,6 +55,17 @@
         }
         #intro-page.fade-out {
             opacity: 0;
+        }
+        #skip-intro {
+            margin-top: 20px;
+            background-color: #002F6C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            display: none;
         }
         #home-page {
             display: none;
@@ -202,18 +214,18 @@
         }
         .keyboard {
             display: none;
-            grid-template-columns: repeat(10, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 5px;
             margin-top: 10px;
             width: 80%;
-            max-width: 600px;
+            max-width: 400px;
         }
         .keyboard button {
             background-color: #C6B9DD;
             border: none;
             border-radius: 5px;
-            padding: 10px;
-            font-size: 1rem;
+            padding: 8px;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -398,7 +410,11 @@
                 width: 90%;
             }
             .keyboard {
-                grid-template-columns: repeat(8, 1fr);
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .keyboard button {
+                padding: 6px;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -412,23 +428,24 @@
         <audio id="intro-audio" autoplay>
             <source src="SOMINTRO.mp3" type="audio/mp3">
         </audio>
+        <button id="skip-intro">Pular Introdução</button>
     </div>
     <!-- Página Inicial do Quiz -->
     <div id="home-page">
-        <img id="mascot-neutral" src="MASCOTENEUTRO.png" alt="Mascote">
+        <img id="mascot-neutral" src="MASCOTENEUTRO.png" alt="Mascote" onerror="console.error('Erro ao carregar MASCOTENEUTRO.png');">
         <button id="start-button">INICIAR EXERCÍCIO</button>
     </div>
     <!-- Página do Quiz -->
     <div id="quiz-page">
-        <img id="logo" src="LOGODAMIAO.png" alt="Logo">
+        <img id="logo" src="LOGODAMIAO.png" alt="Logo" onerror="console.error('Erro ao carregar LOGODAMIAO.png');">
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
         </div>
         <div class="quiz-container">
             <div class="question-header">
-                Escreva corretamente a palavra\nque foi falada
+                Escreva corretamente a frase\nque foi falada
             </div>
-            <img id="mascot-small" src="MASCOTENINHO.png" alt="Mascote Pequeno">
+            <img id="mascot-small" src="MASCOTENINHO.png" alt="Mascote Pequeno" onerror="console.error('Erro ao carregar MASCOTENINHO.png');">
             <div class="audio-controls">
                 <button class="audio-btn" id="play-btn">▶</button>
                 <button class="audio-btn" id="repeat-btn">↻</button>
@@ -444,7 +461,7 @@
                 </div>
             </div>
             <div class="input-container">
-                <input type="text" id="answer-input" placeholder="Digite a palavra..." class="slide-in">
+                <input type="text" id="answer-input" placeholder="Digite a frase em português..." class="slide-in">
                 <div class="keyboard" id="keyboard"></div>
             </div>
             <button class="verify-btn" id="verify-btn">VERIFICAR</button>
@@ -464,43 +481,280 @@
         <div class="results-container">
             <div class="results-header" id="results-title"></div>
             <div class="results-message" id="results-message"></div>
-            <img class="results-mascot" id="results-mascot" src="" alt="Mascote">
+            <img class="results-mascot" id="results-mascot" src="" alt="Mascote" onerror="console.error('Erro ao carregar mascote de resultado');">
             <button id="restart-button">REFAZER TESTE</button>
         </div>
     </div>
-    <audio id="button-audio" src="BUTTON.mp3"></audio>
-    <audio id="win-audio" src="WIN.wav"></audio>
-    <audio id="error-audio" src="ERROR.wav"></audio>
-    <audio id="positive-audio" src="POSITIVO.mp3"></audio>
-    <audio id="negative-audio" src="NEGATIVO.mp3"></audio>
+    <audio id="button-audio" src="BUTTON.mp3" preload="auto"></audio>
+    <audio id="win-audio" src="WIN.wav" preload="auto"></audio>
+    <audio id="error-audio" src="ERROR.wav" preload="auto"></audio>
+    <audio id="positive-audio" src="POSITIVO.mp3" preload="auto"></audio>
+    <audio id="negative-audio" src="NEGATIVO.mp3" preload="auto"></audio>
     <script>
+        // Dados do quiz com possíveis traduções
         const quizData = [
-            { french: "Le sac est grand.", audio: "Le sac est grand..mp3", correctAnswer: "Le sac est grand.", translation: "A bolsa é grande." },
-            { french: "La tâche est difficile.", audio: "La tâche est difficile..mp3", correctAnswer: "La tâche est difficile.", translation: "A tarefa é difícil." },
-            { french: "La leçon est intéressante.", audio: "La leçon est intéressante..mp3", correctAnswer: "La leçon est intéressante.", translation: "A lição é interessante." },
-            { french: "L'étudiant parle français.", audio: "L'étudiant parle français..mp3", correctAnswer: "L'étudiant parle français.", translation: "O estudante fala francês." },
-            { french: "Il mange un autre fruit.", audio: "Il mange un autre fruit..mp3", correctAnswer: "Il mange un autre fruit.", translation: "Ele come uma outra fruta." },
-            { french: "Ma mère est drôle.", audio: "Ma mère est drôle..mp3", correctAnswer: "Ma mère est drôle.", translation: "Minha mãe é engraçada." },
-            { french: "La voiture de mon frère est petite.", audio: "La voiture de mon frère est petite..mp3", correctAnswer: "La voiture de mon frère est petite.", translation: "O carro do meu irmão é pequeno." },
-            { french: "Le cahier est sur la table.", audio: "Le cahier est sur la table..mp3", correctAnswer: "Le cahier est sur la table.", translation: "O caderno está sobre a mesa." },
-            { french: "La chaise est confortable.", audio: "La chaise est confortable..mp3", correctAnswer: "La chaise est confortable.", translation: "A cadeira é confortável." },
-            { french: "Le stylo est bleu.", audio: "Le stylo est bleu..mp3", correctAnswer: "Le stylo est bleu.", translation: "A caneta é azul." },
-            { french: "Il est aussi mauvais.", audio: "Il est aussi mauvais..mp3", correctAnswer: "Il est aussi mauvais.", translation: "Ele também é mau." },
-            { french: "Les toilettes sont aussi grandes.", audio: "Les toilettes sont aussi grandes..mp3", correctAnswer: "Les toilettes sont aussi grandes.", translation: "O banheiro também é grande." },
-            { french: "Le cadeau est pour toi.", audio: "Le cadeau est pour toi..mp3", correctAnswer: "Le cadeau est pour toi.", translation: "O presente é para você." },
-            { french: "La lumière est bleue.", audio: "La lumière est bleue..mp3", correctAnswer: "La lumière est bleue.", translation: "A luz é azul." },
-            { french: "La trousse est bonne.", audio: "La trousse est bonne..mp3", correctAnswer: "La trousse est bonne.", translation: "O estojo é bom." },
-            { french: "Une autre question.", audio: "Une autre question..mp3", correctAnswer: "Une autre question.", translation: "Uma outra pergunta." },
-            { french: "Le jeu est drôle.", audio: "Le jeu est drôle..mp3", correctAnswer: "Le jeu est drôle.", translation: "O jogo é divertido." },
-            { french: "La soif est grande.", audio: "La soif est grande..mp3", correctAnswer: "La soif est grande.", translation: "A sede é grande." },
-            { french: "La joie est importante.", audio: "La joie est importante..mp3", correctAnswer: "La joie est importante.", translation: "A alegria é importante." },
-            { french: "Le bruit est fort.", audio: "Le bruit est fort..mp3", correctAnswer: "Le bruit est fort.", translation: "O barulho é forte." },
-            { french: "Mon père mange tôt.", audio: "Mon père mange tôt..mp3", correctAnswer: "Mon père mange tôt.", translation: "Meu pai come cedo." },
-            { french: "La belle fenêtre de ma maison.", audio: "La belle fenêtre de ma maison..mp3", correctAnswer: "La belle fenêtre de ma maison.", translation: "A bela janela da minha casa." },
-            { french: "Une grande maison bleue.", audio: "Une grande maison bleue..mp3", correctAnswer: "Une grande maison bleue.", translation: "Uma grande casa azul." },
-            { french: "Le livre est intéressant.", audio: "Le livre est intéressant..mp3", correctAnswer: "Le livre est intéressant.", translation: "O livro é interessante." },
-            { french: "L'horloge est lente.", audio: "L'horloge est lente..mp3", correctAnswer: "L'horloge est lente.", translation: "O relógio é lento." },
-            { french: "Un mauvais crayon.", audio: "Un mauvais crayon..mp3", correctAnswer: "Un mauvais crayon.", translation: "Um lápis ruim." }
+            {
+                french: "Le sac est grand.",
+                audio: "Le sac est grand..mp3",
+                correctAnswer: "A bolsa é grande.",
+                possibleTranslations: [
+                    "A bolsa é grande",
+                    "A bolsa está grande",
+                    "A mochila é grande",
+                    "A mochila está grande"
+                ]
+            },
+            {
+                french: "La tâche est difficile.",
+                audio: "La tâche est difficile..mp3",
+                correctAnswer: "A tarefa é difícil.",
+                possibleTranslations: [
+                    "A tarefa é difícil",
+                    "A tarefa está difícil",
+                    "O dever é difícil",
+                    "O dever está difícil"
+                ]
+            },
+            {
+                french: "La leçon est intéressante.",
+                audio: "La leçon est intéressante..mp3",
+                correctAnswer: "A lição é interessante.",
+                possibleTranslations: [
+                    "A lição é interessante",
+                    "A lição está interessante",
+                    "A aula é interessante",
+                    "A aula está interessante"
+                ]
+            },
+            {
+                french: "L'étudiant parle français.",
+                audio: "L'étudiant parle français..mp3",
+                correctAnswer: "O estudante fala francês.",
+                possibleTranslations: [
+                    "O estudante fala francês",
+                    "O aluno fala francês",
+                    "O estudante está falando francês",
+                    "O aluno está falando francês"
+                ]
+            },
+            {
+                french: "Il mange un autre fruit.",
+                audio: "Il mange un autre fruit..mp3",
+                correctAnswer: "Ele come uma outra fruta.",
+                possibleTranslations: [
+                    "Ele come uma outra fruta",
+                    "Ele está comendo uma outra fruta",
+                    "Ele come um outro fruto",
+                    "Ele está comendo um outro fruto"
+                ]
+            },
+            {
+                french: "Ma mère est drôle.",
+                audio: "Ma mère est drôle..mp3",
+                correctAnswer: "Minha mãe é engraçada.",
+                possibleTranslations: [
+                    "Minha mãe é engraçada",
+                    "Minha mãe está engraçada",
+                    "Minha mãe é divertida",
+                    "Minha mãe está divertida"
+                ]
+            },
+            {
+                french: "La voiture de mon frère est petite.",
+                audio: "La voiture de mon frère est petite..mp3",
+                correctAnswer: "O carro do meu irmão é pequeno.",
+                possibleTranslations: [
+                    "O carro do meu irmão é pequeno",
+                    "O carro do meu irmão está pequeno"
+                ]
+            },
+            {
+                french: "Le cahier est sur la table.",
+                audio: "Le cahier est sur la table..mp3",
+                correctAnswer: "O caderno está sobre a mesa.",
+                possibleTranslations: [
+                    "O caderno está sobre a mesa",
+                    "O caderno está em cima da mesa"
+                ]
+            },
+            {
+                french: "La chaise est confortable.",
+                audio: "La chaise est confortable..mp3",
+                correctAnswer: "A cadeira é confortável.",
+                possibleTranslations: [
+                    "A cadeira é confortável",
+                    "A cadeira está confortável"
+                ]
+            },
+            {
+                french: "Le stylo est bleu.",
+                audio: "Le stylo est bleu..mp3",
+                correctAnswer: "A caneta é azul.",
+                possibleTranslations: [
+                    "A caneta é azul",
+                    "A caneta está azul"
+                ]
+            },
+            {
+                french: "Il est aussi mauvais.",
+                audio: "Il est aussi mauvais..mp3",
+                correctAnswer: "Ele também é mau.",
+                possibleTranslations: [
+                    "Ele também é mau",
+                    "Ele também está mau",
+                    "Ele também é ruim",
+                    "Ele também está ruim"
+                ]
+            },
+            {
+                french: "Les toilettes sont aussi grandes.",
+                audio: "Les toilettes sont aussi grandes..mp3",
+                correctAnswer: "O banheiro também é grande.",
+                possibleTranslations: [
+                    "O banheiro também é grande",
+                    "O banheiro também está grande"
+                ]
+            },
+            {
+                french: "Le cadeau est pour toi.",
+                audio: "Le cadeau est pour toi..mp3",
+                correctAnswer: "O presente é para você.",
+                possibleTranslations: [
+                    "O presente é para você",
+                    "O presente é para ti"
+                ]
+            },
+            {
+                french: "La lumière est bleue.",
+                audio: "La lumière est bleue..mp3",
+                correctAnswer: "A luz é azul.",
+                possibleTranslations: [
+                    "A luz é azul",
+                    "A luz está azul"
+                ]
+            },
+            {
+                french: "La trousse est bonne.",
+                audio: "La trousse est bonne..mp3",
+                correctAnswer: "O estojo é bom.",
+                possibleTranslations: [
+                    "O estojo é bom",
+                    "O estojo está bom",
+                    "O penal é bom",
+                    "O penal está bom"
+                ]
+            },
+            {
+                french: "Une autre question.",
+                audio: "Une autre question..mp3",
+                correctAnswer: "Uma outra pergunta.",
+                possibleTranslations: [
+                    "Uma outra pergunta",
+                    "Uma outra questão"
+                ]
+            },
+            {
+                french: "Le jeu est drôle.",
+                audio: "Le jeu est drôle..mp3",
+                correctAnswer: "O jogo é divertido.",
+                possibleTranslations: [
+                    "O jogo é divertido",
+                    "O jogo está divertido",
+                    "A brincadeira é engraçada",
+                    "A brincadeira está engraçada",
+                    "A brincadeira é divertida",
+                    "A brincadeira está divertida"
+                ]
+            },
+            {
+                french: "La soif est grande.",
+                audio: "La soif est grande..mp3",
+                correctAnswer: "A sede é grande.",
+                possibleTranslations: [
+                    "A sede é grande",
+                    "A sede está grande"
+                ]
+            },
+            {
+                french: "La joie est importante.",
+                audio: "La joie est importante..mp3",
+                correctAnswer: "A alegria é importante.",
+                possibleTranslations: [
+                    "A alegria é importante"
+                ]
+            },
+            {
+                french: "Le bruit est fort.",
+                audio: "Le bruit est fort..mp3",
+                correctAnswer: "O barulho é forte.",
+                possibleTranslations: [
+                    "O barulho é forte",
+                    "O barulho está forte",
+                    "O barulho é alto",
+                    "O barulho está alto",
+                    "O ruído é forte",
+                    "O ruído está forte",
+                    "O ruído é alto",
+                    "O ruído está alto"
+                ]
+            },
+            {
+                french: "Mon père mange tôt.",
+                audio: "Mon père mange tôt..mp3",
+                correctAnswer: "Meu pai come cedo.",
+                possibleTranslations: [
+                    "Meu pai come cedo",
+                    "Meu pai está comendo cedo"
+                ]
+            },
+            {
+                french: "La belle fenêtre de ma maison.",
+                audio: "La belle fenêtre de ma maison..mp3",
+                correctAnswer: "A bela janela da minha casa.",
+                possibleTranslations: [
+                    "A bela janela da minha casa",
+                    "A bonita janela da minha casa",
+                    "A janela bonita da minha casa"
+                ]
+            },
+            {
+                french: "Une grande maison bleue.",
+                audio: "Une grande maison bleue..mp3",
+                correctAnswer: "Uma grande casa azul.",
+                possibleTranslations: [
+                    "Uma grande casa azul",
+                    "Uma casa grande azul"
+                ]
+            },
+            {
+                french: "Le livre est intéressant.",
+                audio: "Le livre est intéressant..mp3",
+                correctAnswer: "O livro é interessante.",
+                possibleTranslations: [
+                    "O livro é interessante",
+                    "O livro está interessante"
+                ]
+            },
+            {
+                french: "L'horloge est lente.",
+                audio: "L'horloge est lente..mp3",
+                correctAnswer: "O relógio é lento.",
+                possibleTranslations: [
+                    "O relógio é lento",
+                    "O relógio está lento",
+                    "O relógio está devagar",
+                    "O relógio é devagar"
+                ]
+            },
+            {
+                french: "Un mauvais crayon.",
+                audio: "Un mauvais crayon..mp3",
+                correctAnswer: "Um lápis ruim.",
+                possibleTranslations: [
+                    "Um lápis ruim",
+                    "Um péssimo lápis"
+                ]
+            }
         ];
         let currentQuestion = 0;
         let score = 0;
@@ -509,9 +763,11 @@
         let userAnswers = [];
         let isAnswerSelected = false;
         let currentAudio = null;
+        // Elementos DOM
         const introPage = document.getElementById('intro-page');
         const introVideo = document.getElementById('intro-video');
         const introAudio = document.getElementById('intro-audio');
+        const skipIntroBtn = document.getElementById('skip-intro');
         const homePage = document.getElementById('home-page');
         const startButton = document.getElementById('start-button');
         const quizPage = document.getElementById('quiz-page');
@@ -537,13 +793,15 @@
         const positiveAudio = document.getElementById('positive-audio');
         const negativeAudio = document.getElementById('negative-audio');
         const restartButton = document.getElementById('restart-button');
+        // Teclado virtual com caracteres franceses
         const frenchKeys = [
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-            'u', 'v', 'w', 'x', 'y', 'z', 'à', 'â', 'ç', 'é',
-            'è', 'ê', 'ë', 'î', 'ï', 'ô', 'ù', 'û', ' ', '.',
-            '\'', '-'
+            'u', 'v', 'w', 'x', 'y', 'z', 'à', 'á', 'â', 'ã', 'ä',
+            'ç', 'é', 'è', 'ê', 'ë', 'í', 'î', 'ï', 'ó', 'ô', 'õ',
+            'ú', 'ù', 'û', ' ', '.', ',', '\'', '-', '!', '?'
         ];
+        // Criação do teclado virtual
         function createKeyboard() {
             frenchKeys.forEach(key => {
                 const button = document.createElement('button');
@@ -555,15 +813,18 @@
                 keyboard.appendChild(button);
             });
         }
+        // Função para pular a introdução
         function skipIntro() {
             introPage.classList.add('fade-out');
             setTimeout(() => {
                 introPage.style.display = 'none';
                 homePage.style.display = 'flex';
+                homePage.classList.add('fade-in');
             }, 1000);
         }
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(skipIntro, 5000);
+            // Carrega progresso salvo
             try {
                 const savedProgress = JSON.parse(localStorage.getItem('quizProgress'));
                 if (savedProgress) {
@@ -573,10 +834,21 @@
                     wrongAnswers = savedProgress.wrongAnswers || [];
                     userAnswers = savedProgress.userAnswers || [];
                 }
-            } catch {
+            } catch (e) {
+                console.error('Erro ao carregar progresso do localStorage:', e);
                 localStorage.removeItem('quizProgress');
             }
+            // Tratamento de erro no vídeo e áudio da introdução
+            introVideo.addEventListener('error', () => {
+                console.error('Erro ao carregar VIDEOINTRO.mp4');
+                skipIntroBtn.style.display = 'block';
+            });
+            introAudio.addEventListener('error', () => {
+                console.error('Erro ao carregar SOMINTRO.mp3');
+                skipIntroBtn.style.display = 'block';
+            });
             introVideo.addEventListener('ended', skipIntro);
+            skipIntroBtn.addEventListener('click', skipIntro);
             startButton.addEventListener('click', startQuiz);
             verifyBtn.addEventListener('click', verifyAnswer);
             prevBtn.addEventListener('click', prevQuestion);
@@ -596,8 +868,17 @@
                 }, 100);
             });
             createKeyboard();
+            // Embaralha as questões
             shuffleArray(quizData);
+            // Timeout para pular introdução em caso de falha
+            setTimeout(() => {
+                if (introPage.style.display !== 'none') {
+                    console.warn('Timeout atingido, pulando introdução');
+                    skipIntro();
+                }
+            }, 10000);
         });
+        // Inicia o quiz
         function startQuiz() {
             currentQuestion = 0;
             score = 0;
@@ -607,9 +888,11 @@
             localStorage.removeItem('quizProgress');
             homePage.style.display = 'none';
             quizPage.style.display = 'flex';
+            quizPage.classList.add('fade-in');
             loadQuestion();
             setTimeout(playAudio, 500);
         }
+        // Reinicia o quiz
         function restartQuiz() {
             currentQuestion = 0;
             score = 0;
@@ -619,16 +902,19 @@
             localStorage.removeItem('quizProgress');
             resultsPage.style.display = 'none';
             quizPage.style.display = 'flex';
+            quizPage.classList.add('fade-in');
             shuffleArray(quizData);
             loadQuestion();
             setTimeout(playAudio, 500);
         }
+        // Carrega a questão atual
         function loadQuestion() {
             if (answeredQuestions.every(answered => answered) && wrongAnswers.length === 0) {
                 showResults();
                 return;
             }
             if (currentQuestion >= quizData.length) {
+                // Adiciona questões erradas para repetição
                 quizData.push(...wrongAnswers.map(index => quizData[index]));
                 wrongAnswers = [];
                 currentQuestion = 0;
@@ -636,6 +922,7 @@
             }
             const question = quizData[currentQuestion];
             answerInput.value = '';
+            answerInput.disabled = false;
             answerInput.focus();
             correctAnswer.textContent = '';
             translation.innerHTML = '';
@@ -647,72 +934,82 @@
             if (answeredQuestions[currentQuestion]) {
                 showCorrectAnswer();
             }
+            answerInput.classList.add('slide-in');
             updateProgressBar();
         }
+        // Verifica a resposta do usuário
         function verifyAnswer() {
             if (isAnswerSelected) return;
-            buttonAudio.play().catch(err => console.log("Erro ao reproduzir áudio do botão:", err));
+            buttonAudio.play().catch(err => console.error('Erro ao reproduzir BUTTON.mp3:', err));
             const question = quizData[currentQuestion];
             const userAnswer = answerInput.value.trim().toLowerCase();
-            const isCorrect = userAnswer === question.correctAnswer.toLowerCase();
+            // Verifica se a resposta está entre as possíveis traduções
+            const isCorrect = question.possibleTranslations.some(translation => translation.toLowerCase() === userAnswer);
             userAnswers[currentQuestion] = { selected: userAnswer, isCorrect };
             if (isCorrect) {
                 score++;
                 feedback.textContent = 'CORRETO';
                 feedback.className = 'feedback correct';
-                winAudio.play().catch(err => console.log("Erro ao reproduzir áudio de acerto:", err));
+                winAudio.play().catch(err => console.error('Erro ao reproduzir WIN.wav:', err));
                 const wrongIndex = wrongAnswers.indexOf(currentQuestion);
                 if (wrongIndex !== -1) wrongAnswers.splice(wrongIndex, 1);
             } else {
                 feedback.textContent = 'INCORRETO';
                 feedback.className = 'feedback incorrect';
-                errorAudio.play().catch(err => console.log("Erro ao reproduzir áudio de erro:", err));
+                errorAudio.play().catch(err => console.error('Erro ao reproduzir ERROR.wav:', err));
                 if (!wrongAnswers.includes(currentQuestion)) wrongAnswers.push(currentQuestion);
             }
+            // Exibe a primeira tradução como referência
             correctAnswer.textContent = question.correctAnswer;
-            translation.innerHTML = `<span class="core">${question.translation}</span>`;
+            translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
             answeredQuestions[currentQuestion] = true;
             isAnswerSelected = true;
+            answerInput.disabled = true;
             saveProgress();
         }
+        // Exibe a resposta correta para questões já respondidas
         function showCorrectAnswer() {
             const question = quizData[currentQuestion];
             const userAnswer = userAnswers[currentQuestion];
             correctAnswer.textContent = question.correctAnswer;
-            translation.innerHTML = `<span class="core">${question.translation}</span>`;
+            translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
             if (userAnswer && !userAnswer.isCorrect) {
-                correctAnswer.classList.add('incorrect');
+                feedback.textContent = 'INCORRETO';
+                feedback.className = 'feedback incorrect';
             } else if (userAnswer && userAnswer.isCorrect) {
-                correctAnswer.classList.add('correct');
+                feedback.textContent = 'CORRETO';
+                feedback.className = 'feedback correct';
             }
             answerInput.disabled = true;
         }
+        // Avança para a próxima questão
         function nextQuestion() {
             if (!isAnswerSelected) return;
-            buttonAudio.play().catch(err => console.log("Erro ao reproduzir áudio do botão:", err));
+            buttonAudio.play().catch(err => console.error('Erro ao reproduzir BUTTON.mp3:', err));
             currentQuestion++;
             loadQuestion();
             playAudio();
         }
+        // Volta para a questão anterior
         function prevQuestion() {
             if (currentQuestion > 0) {
-                buttonAudio.play().catch(err => console.log("Erro ao reproduzir áudio do botão:", err));
+                buttonAudio.play().catch(err => console.error('Erro ao reproduzir BUTTON.mp3:', err));
                 currentQuestion--;
                 loadQuestion();
                 playAudio();
             }
         }
+        // Reproduz o áudio da questão
         function playAudio() {
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
             }
             const question = quizData[currentQuestion];
-            const speed = parseFloat(speedSelect.value);
             currentAudio = new Audio(question.audio);
-            currentAudio.playbackRate = speed;
-            currentAudio.play().catch(e => {
-                console.log("Erro ao reproduzir áudio:", e);
+            currentAudio.playbackRate = parseFloat(speedSelect.value);
+            currentAudio.play().catch(err => {
+                console.error(`Erro ao reproduzir ${question.audio}:`, err);
             });
             playBtn.classList.add('audio-playing');
             playBtn.innerHTML = '⏸';
@@ -721,53 +1018,63 @@
                 playBtn.innerHTML = '▶';
             });
         }
+        // Altera a velocidade do áudio
         function changeSpeed() {
             if (currentAudio) {
                 currentAudio.playbackRate = parseFloat(speedSelect.value);
             }
         }
+        // Atualiza a barra de progresso
         function updateProgressBar() {
             const totalQuestions = quizData.length + wrongAnswers.length;
             const answeredCount = answeredQuestions.filter(answered => answered).length;
             progressBar.style.width = `${(answeredCount / totalQuestions) * 100}%`;
         }
+        // Exibe a página de resultados
         function showResults() {
             quizPage.style.display = 'none';
             resultsPage.style.display = 'flex';
+            resultsPage.classList.add('fade-in');
             const totalQuestions = quizData.length;
             const percentage = Math.round((score / totalQuestions) * 100);
             if (percentage >= 95) {
                 resultsTitle.textContent = "EXCELENTE";
-                resultsMessage.innerHTML = `Parabéns pelo seu desempenho excepcional! Você alcançou um resultado EXCELENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso demonstra um domínio impressionante das expressões e da ortografia francesa. Continue assim, pois seu esforço e dedicação são inspiradores! Este resultado reflete não apenas sua habilidade linguística, mas também sua atenção aos detalhes e compromisso em aprender. Que tal continuar explorando o idioma com o mesmo entusiasmo? A prática constante vai te levar ainda mais longe.`;
+                resultsMessage.innerHTML = `Parabéns pelo seu desempenho excepcional! Você alcançou um resultado EXCELENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso demonstra um domínio impressionante das expressões e da ortografia francesa. Continue assim, pois seu esforço e dedicação são inspiradores! Este resultado reflete não apenas sua habilidade linguística, mas também sua atenção aos detalhes e compromisso em aprender. Que tal continuar explorando o idioma com o mesmo entusiasmo? A prática constante vai te levar ainda mais longe.`;
                 resultsMascot.src = "MASCOTEFELIZ.png";
-                positiveAudio.play().catch(err => console.log("Erro ao reproduzir áudio positivo:", err));
+                positiveAudio.play().catch(err => console.error('Erro ao reproduzir POSITIVO.mp3:', err));
             } else if (percentage >= 75) {
                 resultsTitle.textContent = "PARABÉNS";
-                resultsMessage.innerHTML = `Parabéns pelo seu desempenho! Você obteve um BOM resultado, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso mostra que você está no caminho certo, com uma sólida compreensão do idioma. Sua dedicação está valendo a pena, e cada palavra certa é um passo rumo à fluência. Continue assim, brilhando no aprendizado do francês!`;
+                resultsMessage.innerHTML = `Parabéns pelo seu desempenho! Você obteve um BOM resultado, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso mostra que você está no caminho certo, com uma sólida compreensão do idioma. Sua dedicação está valendo a pena, e cada frase certa é um passo rumo à fluência. Continue assim, brilhando no aprendizado do francês!`;
                 resultsMascot.src = "MASCOTEALEGRE.png";
-                positiveAudio.play().catch(err => console.log("Erro ao reproduzir áudio positivo:", err));
+                positiveAudio.play().catch(err => console.error('Erro ao reproduzir POSITIVO.mp3:', err));
             } else if (percentage >= 60) {
                 resultsTitle.textContent = "QUASE LÁ";
-                resultsMessage.innerHTML = `Você alcançou o nível SUFICIENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês! Isso indica um progresso notável, com uma boa base no idioma. Sua dedicação está clara, e você está muito próximo de resultados ainda melhores. Cada palavra escrita é um avanço no aprendizado do francês. Continue se empenhando, e logo verá seu desempenho crescer! Siga firme na jornada para dominar o idioma!`;
+                resultsMessage.innerHTML = `Você alcançou o nível SUFICIENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês! Isso indica um progresso notável, com uma boa base no idioma. Sua dedicação está clara, e você está muito próximo de resultados ainda melhores. Cada frase escrita é um avanço no aprendizado do francês. Continue se empenhando, e logo verá seu desempenho crescer! Siga firme na jornada para dominar o idioma!`;
                 resultsMascot.src = "MASCOTEDUVIDA.png";
-                negativeAudio.play().catch(err => console.log("Erro ao reproduzir áudio negativo:", err));
+                negativeAudio.play().catch(err => console.error('Erro ao reproduzir NEGATIVO.mp3:', err));
             } else {
                 resultsTitle.textContent = "NÃO FOI DESSA VEZ";
-                resultsMessage.innerHTML = `Você obteve o nível INSUFICIENTE, acertando ${score} de ${totalQuestions} palavras no quiz de escrita em francês. Não desanime! Cada tentativa é uma oportunidade de aprendizado, e você já deu o primeiro passo ao participar. O francês pode ser desafiador, mas com prática, você vai melhorar. Reforce as palavras e continue se dedicando. Sua persistência vai te levar mais longe na jornada do idioma!`;
+                resultsMessage.innerHTML = `Você obteve o nível INSUFICIENTE, acertando ${score} de ${totalQuestions} frases no quiz de escrita em francês. Não desanime! Cada tentativa é uma oportunidade de aprendizado, e você já deu o primeiro passo ao participar. O francês pode ser desafiador, mas com prática, você vai melhorar. Reforce as frases e continue se dedicando. Sua persistência vai te levar mais longe na jornada do idioma!`;
                 resultsMascot.src = "MASCOTEDUVIDA.png";
-                negativeAudio.play().catch(err => console.log("Erro ao reproduzir áudio negativo:", err));
+                negativeAudio.play().catch(err => console.error('Erro ao reproduzir NEGATIVO.mp3:', err));
             }
             localStorage.removeItem('quizProgress');
         }
+        // Salva o progresso no localStorage
         function saveProgress() {
-            localStorage.setItem('quizProgress', JSON.stringify({
-                currentQuestion,
-                score,
-                answeredQuestions,
-                wrongAnswers,
-                userAnswers
-            }));
+            try {
+                localStorage.setItem('quizProgress', JSON.stringify({
+                    currentQuestion,
+                    score,
+                    answeredQuestions,
+                    wrongAnswers,
+                    userAnswers
+                }));
+            } catch (e) {
+                console.error('Erro ao salvar progresso no localStorage:', e);
+            }
         }
+        // Embaralha o array de questões
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -775,6 +1082,7 @@
             }
             return array;
         }
+        // Suporte a gestos para dispositivos móveis
         let touchStartX = 0;
         let touchEndX = 0;
         document.addEventListener('touchstart', e => {
