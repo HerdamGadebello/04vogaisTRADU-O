@@ -276,6 +276,23 @@
             font-weight: normal;
             display: block;
         }
+        .possible-translations {
+            background-color: #F4F1EC;
+            border-radius: 10px;
+            padding: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            color: black;
+            text-align: left;
+        }
+        .possible-translations ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .possible-translations li {
+            margin: 5px 0;
+        }
         .navigation-btns {
             display: flex;
             justify-content: center;
@@ -423,7 +440,7 @@
         </div>
         <div class="quiz-container">
             <div class="question-header">
-                Traduza a palavra
+                Traduza a frase
                 <div class="french-phrase" id="french-phrase"></div>
             </div>
             <img id="mascot-small" src="MASCOTENINHO.png" alt="Mascote Pequeno" onerror="console.error('Erro ao carregar MASCOTENINHO.png');">
@@ -449,6 +466,7 @@
                 <div class="correct-answer" id="correct-answer"></div>
                 <div class="translation" id="translation"></div>
                 <div class="feedback" id="feedback"></div>
+                <div class="possible-translations" id="possible-translations"></div>
             </div>
             <div class="navigation-btns">
                 <button class="nav-btn" id="prev-btn">VOLTAR</button>
@@ -757,6 +775,7 @@
         const correctAnswer = document.getElementById('correct-answer');
         const translation = document.getElementById('translation');
         const frenchPhrase = document.getElementById('french-phrase');
+        const possibleTranslations = document.getElementById('possible-translations');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const progressBar = document.getElementById('progress-bar');
@@ -876,6 +895,7 @@
             correctAnswer.textContent = '';
             translation.innerHTML = '';
             feedback.textContent = '';
+            possibleTranslations.innerHTML = '';
             feedback.className = 'feedback';
             frenchPhrase.textContent = question.french;
             isAnswerSelected = false;
@@ -912,6 +932,12 @@
             // Exibe a primeira tradução como referência
             correctAnswer.textContent = question.correctAnswer;
             translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
+            // Exibe todas as possíveis traduções
+            possibleTranslations.innerHTML = `
+                <ul>
+                    ${question.possibleTranslations.map(translation => `<li>${translation}</li>`).join('')}
+                </ul>
+            `;
             answeredQuestions[currentQuestion] = true;
             isAnswerSelected = true;
             answerInput.disabled = true;
@@ -923,6 +949,11 @@
             const userAnswer = userAnswers[currentQuestion];
             correctAnswer.textContent = question.correctAnswer;
             translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
+            possibleTranslations.innerHTML = `
+                <ul>
+                    ${question.possibleTranslations.map(translation => `<li>${translation}</li>`).join('')}
+                </ul>
+            `;
             frenchPhrase.textContent = question.french;
             if (userAnswer && !userAnswer.isCorrect) {
                 feedback.textContent = 'INCORRETO';
