@@ -134,6 +134,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             white-space: pre-wrap;
         }
+        .french-phrase {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            color: white;
+            margin-top: 10px;
+            text-align: center;
+        }
         #mascot-small {
             position: absolute;
             left: -30px;
@@ -218,20 +225,24 @@
             gap: 5px;
             margin-top: 10px;
             width: 80%;
-            max-width: 400px;
+            max-width: 500px;
         }
         .keyboard button {
             background-color: #C6B9DD;
             border: none;
             border-radius: 5px;
-            padding: 8px;
-            font-size: 0.9rem;
+            padding: 10px;
+            font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
         .keyboard button:hover {
             background-color: #A7007B;
             color: white;
+        }
+        .keyboard .clear-btn {
+            background-color: #C8102E;
+            grid-column: span 2;
         }
         .verify-btn {
             background-color: #3B8C59;
@@ -413,6 +424,15 @@
                 grid-template-columns: repeat(6, 1fr);
             }
             .keyboard button {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .keyboard {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            .keyboard button {
                 padding: 6px;
                 font-size: 0.8rem;
             }
@@ -443,7 +463,8 @@
         </div>
         <div class="quiz-container">
             <div class="question-header">
-                Escreva corretamente a frase\nque foi falada
+                Escreva corretamente a frase que foi falada
+                <div class="french-phrase" id="french-phrase"></div>
             </div>
             <img id="mascot-small" src="MASCOTENINHO.png" alt="Mascote Pequeno" onerror="console.error('Erro ao carregar MASCOTENINHO.png');">
             <div class="audio-controls">
@@ -777,6 +798,7 @@
         const feedback = document.getElementById('feedback');
         const correctAnswer = document.getElementById('correct-answer');
         const translation = document.getElementById('translation');
+        const frenchPhrase = document.getElementById('french-phrase');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const progressBar = document.getElementById('progress-bar');
@@ -799,17 +821,25 @@
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
             'u', 'v', 'w', 'x', 'y', 'z', 'à', 'á', 'â', 'ã', 'ä',
             'ç', 'é', 'è', 'ê', 'ë', 'í', 'î', 'ï', 'ó', 'ô', 'õ',
-            'ú', 'ù', 'û', ' ', '.', ',', '\'', '-', '!', '?'
+            'ú', 'ù', 'û', ' ', '.', ',', '\'', '-', '!', '?', 'Clear'
         ];
         // Criação do teclado virtual
         function createKeyboard() {
             frenchKeys.forEach(key => {
                 const button = document.createElement('button');
                 button.textContent = key;
-                button.addEventListener('click', () => {
-                    answerInput.value += key;
-                    answerInput.focus();
-                });
+                if (key === 'Clear') {
+                    button.classList.add('clear-btn');
+                    button.addEventListener('click', () => {
+                        answerInput.value = '';
+                        answerInput.focus();
+                    });
+                } else {
+                    button.addEventListener('click', () => {
+                        answerInput.value += key;
+                        answerInput.focus();
+                    });
+                }
                 keyboard.appendChild(button);
             });
         }
@@ -859,10 +889,12 @@
             restartButton.addEventListener('click', restartQuiz);
             answerInput.addEventListener('focus', () => {
                 keyboard.style.display = 'grid';
+                keyboard.classList.add('fade-in');
             });
             answerInput.addEventListener('blur', () => {
+                // Apenas esconde o teclado se o clique não for em um botão do teclado
                 setTimeout(() => {
-                    if (document.activeElement !== answerInput) {
+                    if (!keyboard.contains(document.activeElement)) {
                         keyboard.style.display = 'none';
                     }
                 }, 100);
@@ -928,6 +960,7 @@
             translation.innerHTML = '';
             feedback.textContent = '';
             feedback.className = 'feedback';
+            frenchPhrase.textContent = question.french;
             isAnswerSelected = false;
             prevBtn.disabled = currentQuestion === 0;
             nextBtn.textContent = answeredQuestions.every(answered => answered) && wrongAnswers.length === 0 ? "VER RESULTADO" : "AVANÇAR";
@@ -973,6 +1006,7 @@
             const userAnswer = userAnswers[currentQuestion];
             correctAnswer.textContent = question.correctAnswer;
             translation.innerHTML = `<span class="core">${question.correctAnswer}</span>`;
+            frenchPhrase.textContent = question.french;
             if (userAnswer && !userAnswer.isCorrect) {
                 feedback.textContent = 'INCORRETO';
                 feedback.className = 'feedback incorrect';
